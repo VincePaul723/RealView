@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Profile</title>
+    <!-- Load the page styles. -->
+    <link rel="stylesheet" href="styling.css" />
+  </head>
+  <body>
+    <main class="profile-page">
+      <!-- Profile picture and name appear at the top-left. -->
+      <header class="profile-header">
+        <div class="profile-picture" role="img" aria-label="Profile picture placeholder"></div>
+        <h1>Your Name</h1>
+      </header>
+
+      <!-- Empty areas to use as profile widgets untill I figure out what I want there. -->
+      <section class="widget-grid" aria-label="Profile widgets">
+        <div class="widget" aria-label="Empty widget"></div>
+        <div class="widget" aria-label="Empty widget"></div>
+        <div class="widget" aria-label="Empty widget"></div>
+        <div class="widget" aria-label="Empty widget"></div>
+      </section>
+    </main>
+
+    <!-- Button for switching between light and dark themes. -->
+    <button id="theme_toggler" type="button" aria-pressed="false">Change theme</button>
+    <!-- Load the theme-switching code. -->
+    <script src="JV.js"></script>
+  </body>
+</html>

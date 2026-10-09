@@ -1,0 +1,106 @@
+/* Blue, white, and purple colors for the light theme. */
+:root {
+  --page-bg: #f3f6ff;
+  --card-bg: #ffffff;
+  --text: #20264a;
+  --muted: #68708d;
+  --accent: #6654c0;
+  --widget-bg: #dce4fb;
+}
+
+/* Replace the colors when dark mode is turned on. */
+.dark_mode {
+  --page-bg: #171b30;
+  --card-bg: #242b47;
+  --text: #f4f5ff;
+  --muted: #bdc6e5;
+  --accent: #aa9aff;
+  --widget-bg: #38446b;
+}
+
+/* Make element sizing easier to control. */
+* {
+  box-sizing: border-box;
+}
+
+/* Set the page's basic appearance. Added a cool little transition effect to it to. Im going to switch over to react soon though. */
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 32px;
+  background: var(--page-bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Keep the profile area near the top of the page. */
+.profile-page {
+  width: min(100%, 1100px);
+  margin: 0 auto;
+}
+
+/* Place the profile picture and name together at the top-left. */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* Draw a simple empty circle for the profile picture. */
+.profile-picture {
+  width: 76px;
+  height: 76px;
+  flex: 0 0 auto;
+  border: 2px dashed var(--muted);
+  border-radius: 50%;
+  background: var(--card-bg);
+}
+
+/* Style the profile name. */
+.profile-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+/* Arrange the empty widgets in a responsive grid. */
+.widget-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+/* Show each empty widget as a blank panel. */
+.widget {
+  min-height: 180px;
+  border: 1px solid var(--widget-bg);
+  border-radius: 8px;
+  background: var(--card-bg);
+  box-shadow: 0 3px 12px rgb(0 0 0 / 6%);
+}
+
+/* Keep the theme button in the bottom-right corner. */
+#theme_toggler {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--card-bg);
+  cursor: pointer;
+  font: inherit;
+}
+
+/* Stack the blank widgets on narrow screens. */
+@media (max-width: 600px) {
+  body {
+    padding: 24px 18px 80px;
+  }
+
+  .widget-grid {
+    grid-template-columns: 1fr;
+  }
+}
