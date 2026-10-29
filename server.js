@@ -2,12 +2,26 @@ require("dotenv").config(); //loads the MySQL password from the .env file
 
 const express = require("express"); //imports the express module
 const crypt = require("crypto"); //used to hash passwords
+const session = require("express-session"); //keeps users logged in between pages
+const cookieParser = require("cookie-parser"); //reads cookies sent by the browser
 const app = express(); //creates the express application object
 app.use(express.urlencoded({ extended: true })); //lets us read form data from req.body
+app.use(cookieParser());
+
+app.use(session({
+	secret: process.env.SESSION_SECRET, // Used to sign the session ID cookie
+	resave: false,                      // Prevents resaving unchanged sessions
+	saveUninitialized: false,           // Prevents storing empty, uninitialized sessions
+	cookie: {
+		maxAge: 60000 * 60,             // Cookie expiry in milliseconds (1 hour)
+		httpOnly: true,                 // Protects against XSS attacks
+		secure: false                   // Set to true if using HTTPS
+	}
+}));
 app.use(express.static("public")); //register public as the directory for static files
 
 const mysql = require("mysql2"); //uses new mysql package
-const requiredDatabaseSettings = ["MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_DATABASE"];
+const requiredDatabaseSettings = ["MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_DATABASE", "SESSION_SECRET"];
 const missingDatabaseSettings = requiredDatabaseSettings.filter(
 	(setting) => !process.env[setting]
 );
@@ -52,6 +66,12 @@ function hashPassword(plainPass, salt)
 	return crypt.pbkdf2Sync(plainPass, salt, hashRounds, hashLength, 'sha512').toString('hex');
 }
 
+//makes user input safe to put inside HTML
+function escapeHtml(text)
+{
+	return String(text).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
 //register a new user
 app.post("/register",function(req,res)
 {
@@ -85,7 +105,7 @@ app.post("/login",function(req,res)
 	let username = req.body.username;
 	let plainPass = req.body.password;
 
-	let sql = "select password_hash from users where username = ?";
+	let sql = "select user_id, username, email, password_hash from users where username = ?";
 	conn.query(sql,[username],function(err,result)
 	{
 		if (err)
@@ -104,8 +124,40 @@ app.post("/login",function(req,res)
 		}
 
 		if (loggedIn)
-			res.send('<p>You have logged in successfully</p>');
+		{
+			//remember who is logged in for the rest of the session
+			req.session.user = {user_id: result[0].user_id, username: result[0].username, email: result[0].email};
+			res.send(`<p>You have logged in successfully ${escapeHtml(username)}.<br> Visit your <a href="/profile">Profile</a></p>`);
+		}
 		else
 			res.send('<p>The login credentials were incorrect. <a href="login.html">Back to login</a></p>');
+	});
+});
+
+//shows the logged in user's info
+app.get("/profile",function(req,res)
+{
+	if (!req.session.user)
+		res.send('<p>You are not logged in. Please <a href="login.html">Login here</a>.</p>');
+	else
+		res.send(`<p>Hi ${escapeHtml(req.session.user.username)}. Your e-mail is ${escapeHtml(req.session.user.email)}.<br><a href="Main.html">Go to your page</a> | <a href="/logout">Logout</a></p>`);
+});
+
+//sends the logged in user as JSON so pages can show their name
+app.get("/user",function(req,res)
+{
+	if (!req.session.user)
+		res.status(401).json({error: "Not logged in"});
+	else
+		res.json(req.session.user);
+});
+
+//logs the user out
+app.get("/logout",function(req,res)
+{
+	req.session.destroy((err)=>
+	{
+		if (err) res.send("Error logging out");
+		else res.send('<p>Logged out successfully! <a href="login.html">Login Here</a></p>');
 	});
 });
